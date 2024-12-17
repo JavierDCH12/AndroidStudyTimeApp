@@ -26,7 +26,7 @@ public class FragmentTimer extends Fragment {
     private boolean isRunning;
     private long timeLeftInMillis = 30 * 1000;
     private CountDownTimer timer;
-    private int sessionCount=0;
+    private int sessionCount=1;
     private static final long STUDY_TIME = 30 * 1000;// 25 minutos
     private static final long SHORT_BREAK_TIME = 30 * 1000; // 5 minutos
     private static final long LONG_BREAK_TIME = 30 * 1000; // 15 minutos
@@ -45,27 +45,24 @@ public class FragmentTimer extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentTimerBinding.inflate(inflater, container, false);
 
+        // Inicializar con la fase de estudio (asegúrate de que el primer paso sea siempre estudio)
+        setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
 
-        binding.startButton.setOnClickListener(v->startTimer());
-        binding.pauseButton.setOnClickListener(v->pauseTimer());
-        binding.resetButton.setOnClickListener(v->resetTimer());
-        binding.timerTextView.setText("STUDY TIME");
-
-
-        updateTimerText();
+        binding.startButton.setOnClickListener(v -> startTimer());
+        binding.pauseButton.setOnClickListener(v -> pauseTimer());
+        binding.resetButton.setOnClickListener(v -> resetTimer());
 
         return binding.getRoot();
     }
 
     private void startTimer() {
         if (!isRunning) {
-            binding.progressBar.setMax((int) timeLeftInMillis); // Valor máximo del progreso
-            timer = new CountDownTimer(timeLeftInMillis, 10) { // Intervalo de 10 ms
+            // Establecer el valor máximo del ProgressBar y arrancar con el ciclo de estudio
+            binding.progressBar.setMax((int) timeLeftInMillis);
+            timer = new CountDownTimer(timeLeftInMillis, 10) { // Intervalo de 10 ms para precisión
                 @Override
                 public void onTick(long millisUntilFinished) {
                     timeLeftInMillis = millisUntilFinished;
@@ -76,10 +73,10 @@ public class FragmentTimer extends Fragment {
                 @Override
                 public void onFinish() {
                     isRunning = false;
-                    sessionCount++;
+                    sessionCount++; // Aumentar el contador de sesiones
 
-                    // Llamamos a un método para manejar la siguiente fase
-                    handleNextPhase();
+                    // Aquí se maneja la transición entre las fases
+                    handleNextPhase(); // Realiza la transición a la siguiente fase
                 }
             }.start();
             isRunning = true;
@@ -87,10 +84,10 @@ public class FragmentTimer extends Fragment {
     }
 
     private void handleNextPhase() {
-        if (sessionCount % 8 == 0) { // Cada 4 estudios → Descanso largo
+        if (sessionCount % 8 == 0) { // Después de 4 sesiones de estudio, descanso largo
             setPhase(LONG_BREAK_TIME, "LONG BREAK TIME", R.color.long_break_color);
             showEndOfCycle();
-        } else if (sessionCount % 2 == 0) { // Descanso corto
+        } else if (sessionCount % 2 == 0) { // Descanso corto después de cada estudio
             setPhase(SHORT_BREAK_TIME, "SHORT BREAK TIME", R.color.short_break_color);
         } else { // Fase de estudio
             setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
@@ -113,7 +110,6 @@ public class FragmentTimer extends Fragment {
         updateTimerText();
     }
 
-
     private void pauseTimer() {
         if (isRunning) {
             timer.cancel();
@@ -129,6 +125,7 @@ public class FragmentTimer extends Fragment {
         sessionCount = 0;
         setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
     }
+
 
     private void updateTimerText() {
         int minutes = (int) (timeLeftInMillis / 1000) / 60;
