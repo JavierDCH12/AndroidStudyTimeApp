@@ -26,14 +26,14 @@
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="25:00"
-        android:textSize="48sp"
-        android:textStyle="bold"
         android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/timerTypeTextView"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="60sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timerTypeTextView" />
 
     <!-- Barra de progreso circular -->
     <ProgressBar
