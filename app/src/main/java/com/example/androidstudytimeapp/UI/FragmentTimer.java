@@ -1,6 +1,7 @@
 package com.example.androidstudytimeapp.UI;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 
@@ -10,6 +11,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
+import android.os.Vibrator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +26,12 @@ public class FragmentTimer extends Fragment {
 
     FragmentTimerBinding binding;
     private boolean isRunning;
-    private long timeLeftInMillis = 30 * 1000;
+    private long timeLeftInMillis = 10 * 1000;
     private CountDownTimer timer;
     private int sessionCount=1;
-    private static final long STUDY_TIME = 30 * 1000;// 25 minutos
-    private static final long SHORT_BREAK_TIME = 30 * 1000; // 5 minutos
-    private static final long LONG_BREAK_TIME = 30 * 1000; // 15 minutos
+    private static final long STUDY_TIME = 10 * 1000;// 25 minutos
+    private static final long SHORT_BREAK_TIME = 10 * 1000; // 5 minutos
+    private static final long LONG_BREAK_TIME = 10 * 1000; // 15 minutos
 
 
 
@@ -60,9 +62,8 @@ public class FragmentTimer extends Fragment {
 
     private void startTimer() {
         if (!isRunning) {
-            // Establecer el valor máximo del ProgressBar y arrancar con el ciclo de estudio
             binding.progressBar.setMax((int) timeLeftInMillis);
-            timer = new CountDownTimer(timeLeftInMillis, 10) { // Intervalo de 10 ms para precisión
+            timer = new CountDownTimer(timeLeftInMillis, 10) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     timeLeftInMillis = millisUntilFinished;
@@ -73,34 +74,54 @@ public class FragmentTimer extends Fragment {
                 @Override
                 public void onFinish() {
                     isRunning = false;
-                    sessionCount++; // Aumentar el contador de sesiones
+                    sessionCount++;
 
-                    // Aquí se maneja la transición entre las fases
-                    handleNextPhase(); // Realiza la transición a la siguiente fase
+
+                    handleNextPhase();
                 }
             }.start();
             isRunning = true;
         }
     }
 
+    private void vibratePhone(int mili) {
+        Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+        if(vibrator != null && vibrator.hasVibrator()) {
+            vibrator.vibrate(mili);
+
+        }
+    }
+    private void vibratePhonePattern() {
+        Vibrator vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator != null && vibrator.hasVibrator()) {
+            long[] pattern = {0, 200, 200, 200, 100, 100};
+            vibrator.vibrate(pattern, -1);
+        }
+    }
+
     private void handleNextPhase() {
-        if (sessionCount % 8 == 0) { // Después de 4 sesiones de estudio, descanso largo
+        if (sessionCount % 8 == 0) {
             setPhase(LONG_BREAK_TIME, "LONG BREAK TIME", R.color.long_break_color);
+            vibratePhone(2000);
+
             showEndOfCycle();
-        } else if (sessionCount % 2 == 0) { // Descanso corto después de cada estudio
+        } else if (sessionCount % 2 == 0) {
             setPhase(SHORT_BREAK_TIME, "SHORT BREAK TIME", R.color.short_break_color);
+            vibratePhone(1000);
+
         } else { // Fase de estudio
             setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
+            vibratePhonePattern();
+
         }
 
-        startTimer(); // Iniciar automáticamente la siguiente fase
+        startTimer();
     }
 
     private void setPhase(long phaseTime, String phaseTitle, int colorRes) {
         timeLeftInMillis = phaseTime;
         binding.timerTypeTextView.setText(phaseTitle);
 
-        // Cambiar el color del ProgressBar y del texto usando ContextCompat
         int color = ContextCompat.getColor(requireContext(), colorRes);
         binding.progressBar.setProgressTintList(ColorStateList.valueOf(color));
         binding.timerTypeTextView.setTextColor(color);
@@ -137,25 +158,26 @@ public class FragmentTimer extends Fragment {
     }
 
     private void showEndOfCycle() {
+        pauseTimer();
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Ciclo de estudio completado")
                 .setMessage("Has completado 4 sesiones de estudio. ¿Quieres seguir o acabar por hoy?")
-                .setPositiveButton("Estudiar", (dialog, which) ->{
-                    sessionCount=0;
-                    timeLeftInMillis=STUDY_TIME;
+                .setPositiveButton("Estudiar", (dialog, which) -> {
+                    sessionCount = 0;
+                    timeLeftInMillis = STUDY_TIME;
                     updateTimerText();
-                    pauseTimer();
-                    resetTimer();
+                    startTimer();
                 })
-                .setNegativeButton("Acaabr por hoy", (dialog, which) ->{
+                .setNegativeButton("Acabar por hoy", (dialog, which) -> {
                     binding.timerTextView.setText("¡Bien hecho! Estudio finalizado por hoy.");
-                    timeLeftInMillis=0;
+                    timeLeftInMillis = 0;
                     updateTimerText();
                 })
                 .setCancelable(false)
                 .show();
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
