@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="study_color">#4CAF50</color> <!-- Verde para estudio -->
+    <color name="short_break_color">#2196F3</color> <!-- Azul para descanso corto -->
+    <color name="long_break_color">#FF9800</color> <!-- Naranja para descanso largo -->
 </resources>

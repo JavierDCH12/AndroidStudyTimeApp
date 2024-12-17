@@ -1,9 +1,12 @@
 package com.example.androidstudytimeapp.UI;
 
+import android.app.AlertDialog;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
@@ -51,6 +54,8 @@ public class FragmentTimer extends Fragment {
         binding.startButton.setOnClickListener(v->startTimer());
         binding.pauseButton.setOnClickListener(v->pauseTimer());
         binding.resetButton.setOnClickListener(v->resetTimer());
+        binding.timerTextView.setText("STUDY TIME");
+
 
         updateTimerText();
 
@@ -59,10 +64,12 @@ public class FragmentTimer extends Fragment {
 
     private void startTimer() {
         if (!isRunning) {
-            timer = new CountDownTimer(timeLeftInMillis, 10) { // Intervalo de 10ms para precisión
+            binding.progressBar.setMax((int) timeLeftInMillis); // Valor máximo del progreso
+            timer = new CountDownTimer(timeLeftInMillis, 10) { // Intervalo de 10 ms
                 @Override
                 public void onTick(long millisUntilFinished) {
                     timeLeftInMillis = millisUntilFinished;
+                    binding.progressBar.setProgress((int) timeLeftInMillis);
                     updateTimerText();
                 }
 
@@ -71,39 +78,56 @@ public class FragmentTimer extends Fragment {
                     isRunning = false;
                     sessionCount++;
 
-                    // Determinar la siguiente fase
-                    if (sessionCount % 8 == 0) { // Descanso largo después de 4 estudios
-                        timeLeftInMillis = LONG_BREAK_TIME;
-                        binding.timerTypeTextView.setText("LONG BREAK TIME");
-                    } else if (sessionCount % 2 == 0) { // Descanso corto después de cada estudio
-                        timeLeftInMillis = SHORT_BREAK_TIME;
-                        binding.timerTypeTextView.setText("SHORT BREAK TIME");
-                    } else { // Fase de estudio
-                        timeLeftInMillis = STUDY_TIME;
-                        binding.timerTypeTextView.setText("TIME TO STUDY");
-                    }
-                    startTimer(); // Iniciar automáticamente la siguiente fase
+                    // Llamamos a un método para manejar la siguiente fase
+                    handleNextPhase();
                 }
             }.start();
             isRunning = true;
         }
     }
 
+    private void handleNextPhase() {
+        if (sessionCount % 8 == 0) { // Cada 4 estudios → Descanso largo
+            setPhase(LONG_BREAK_TIME, "LONG BREAK TIME", R.color.long_break_color);
+            showEndOfCycle();
+        } else if (sessionCount % 2 == 0) { // Descanso corto
+            setPhase(SHORT_BREAK_TIME, "SHORT BREAK TIME", R.color.short_break_color);
+        } else { // Fase de estudio
+            setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
+        }
+
+        startTimer(); // Iniciar automáticamente la siguiente fase
+    }
+
+    private void setPhase(long phaseTime, String phaseTitle, int colorRes) {
+        timeLeftInMillis = phaseTime;
+        binding.timerTypeTextView.setText(phaseTitle);
+
+        // Cambiar el color del ProgressBar y del texto usando ContextCompat
+        int color = ContextCompat.getColor(requireContext(), colorRes);
+        binding.progressBar.setProgressTintList(ColorStateList.valueOf(color));
+        binding.timerTypeTextView.setTextColor(color);
+
+        binding.progressBar.setMax((int) phaseTime);
+        binding.progressBar.setProgress((int) phaseTime);
+        updateTimerText();
+    }
+
+
     private void pauseTimer() {
-        if(isRunning){
+        if (isRunning) {
             timer.cancel();
-            isRunning=false;
+            isRunning = false;
         }
     }
 
     private void resetTimer() {
-        if(isRunning){
+        if (isRunning) {
             timer.cancel();
-            isRunning=false;
-            timeLeftInMillis = 25*60*1000;
-            updateTimerText();
-
+            isRunning = false;
         }
+        sessionCount = 0;
+        setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
     }
 
     private void updateTimerText() {
@@ -113,6 +137,27 @@ public class FragmentTimer extends Fragment {
 
         String timeFormatted = String.format(Locale.getDefault(), "%02d:%02d:%02d", minutes, seconds, milliseconds);
         binding.timerTextView.setText(timeFormatted);
+    }
+
+    private void showEndOfCycle() {
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Ciclo de estudio completado")
+                .setMessage("Has completado 4 sesiones de estudio. ¿Quieres seguir o acabar por hoy?")
+                .setPositiveButton("Estudiar", (dialog, which) ->{
+                    sessionCount=0;
+                    timeLeftInMillis=STUDY_TIME;
+                    updateTimerText();
+                    pauseTimer();
+                    resetTimer();
+                })
+                .setNegativeButton("Acaabr por hoy", (dialog, which) ->{
+                    binding.timerTextView.setText("¡Bien hecho! Estudio finalizado por hoy.");
+                    timeLeftInMillis=0;
+                    updateTimerText();
+                })
+                .setCancelable(false)
+                .show();
     }
 
     @Override

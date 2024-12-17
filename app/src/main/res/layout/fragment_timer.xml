@@ -39,7 +39,7 @@
         android:id="@+id/progressBar"
         style="@android:style/Widget.Material.ProgressBar.Horizontal"
         android:layout_width="0dp"
-        android:layout_height="8dp"
+        android:layout_height="10dp"
         android:progress="0"
         android:max="100"
         app:layout_constraintTop_toBottomOf="@id/timerTextView"
