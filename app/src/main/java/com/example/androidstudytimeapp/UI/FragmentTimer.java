@@ -21,8 +21,12 @@ public class FragmentTimer extends Fragment {
 
     FragmentTimerBinding binding;
     private boolean isRunning;
-    private long timeLeftInMillis = 25*60*1000;
+    private long timeLeftInMillis = 30 * 1000;
     private CountDownTimer timer;
+    private int sessionCount=0;
+    private static final long STUDY_TIME = 30 * 1000;// 25 minutos
+    private static final long SHORT_BREAK_TIME = 30 * 1000; // 5 minutos
+    private static final long LONG_BREAK_TIME = 30 * 1000; // 15 minutos
 
 
 
@@ -54,29 +58,35 @@ public class FragmentTimer extends Fragment {
     }
 
     private void startTimer() {
-        if(!isRunning){
-            timer = new CountDownTimer(timeLeftInMillis, 100) {
+        if (!isRunning) {
+            timer = new CountDownTimer(timeLeftInMillis, 10) { // Intervalo de 10ms para precisión
                 @Override
-                public void onTick(long millistUntilFinished) {
-                    timeLeftInMillis =millistUntilFinished;
+                public void onTick(long millisUntilFinished) {
+                    timeLeftInMillis = millisUntilFinished;
                     updateTimerText();
-
                 }
 
                 @Override
                 public void onFinish() {
-                    isRunning=false;
-                    updateTimerText();
-                    binding.timerTextView.setText("Tiempo terminado!");
+                    isRunning = false;
+                    sessionCount++;
 
-
+                    // Determinar la siguiente fase
+                    if (sessionCount % 8 == 0) { // Descanso largo después de 4 estudios
+                        timeLeftInMillis = LONG_BREAK_TIME;
+                        binding.timerTypeTextView.setText("LONG BREAK TIME");
+                    } else if (sessionCount % 2 == 0) { // Descanso corto después de cada estudio
+                        timeLeftInMillis = SHORT_BREAK_TIME;
+                        binding.timerTypeTextView.setText("SHORT BREAK TIME");
+                    } else { // Fase de estudio
+                        timeLeftInMillis = STUDY_TIME;
+                        binding.timerTypeTextView.setText("TIME TO STUDY");
+                    }
+                    startTimer(); // Iniciar automáticamente la siguiente fase
                 }
             }.start();
-
-            isRunning=true;
-
+            isRunning = true;
         }
-
     }
 
     private void pauseTimer() {
@@ -97,9 +107,9 @@ public class FragmentTimer extends Fragment {
     }
 
     private void updateTimerText() {
-        int minutes = (int) (timeLeftInMillis / 1000) / 60; // Minutos
-        int seconds = (int) (timeLeftInMillis / 1000) % 60; // Segundos
-        int milliseconds = (int) (timeLeftInMillis % 1000) / 10; // Milisegundos (dividido por 10 para mostrar solo 2 dígitos)
+        int minutes = (int) (timeLeftInMillis / 1000) / 60;
+        int seconds = (int) (timeLeftInMillis / 1000) % 60;
+        int milliseconds = (int) (timeLeftInMillis % 1000) / 10;
 
         String timeFormatted = String.format(Locale.getDefault(), "%02d:%02d:%02d", minutes, seconds, milliseconds);
         binding.timerTextView.setText(timeFormatted);
