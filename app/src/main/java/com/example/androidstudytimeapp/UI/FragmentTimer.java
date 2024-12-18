@@ -1,5 +1,7 @@
 package com.example.androidstudytimeapp.UI;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -29,9 +31,9 @@ public class FragmentTimer extends Fragment {
     private long timeLeftInMillis = 10 * 1000;
     private CountDownTimer timer;
     private int sessionCount=1;
-    private static final long STUDY_TIME = 10 * 1000;// 25 minutos
-    private static final long SHORT_BREAK_TIME = 10 * 1000; // 5 minutos
-    private static final long LONG_BREAK_TIME = 10 * 1000; // 15 minutos
+    private static final long STUDY_TIME = 10 * 1000;
+    private static final long SHORT_BREAK_TIME = 10 * 1000;
+    private static final long LONG_BREAK_TIME = 10 * 1000;
 
 
 
@@ -76,6 +78,12 @@ public class FragmentTimer extends Fragment {
                     isRunning = false;
                     sessionCount++;
 
+                    ObjectAnimator pulse = ObjectAnimator.ofFloat(binding.progressBar, "scaleX", 1f, 1.1f, 1f);
+                    pulse.setRepeatCount(3);
+                    pulse.setRepeatMode(ValueAnimator.REVERSE);
+                    pulse.setDuration(300);
+                    pulse.start();
+
 
                     handleNextPhase();
                 }
@@ -114,6 +122,10 @@ public class FragmentTimer extends Fragment {
             vibratePhonePattern();
 
         }
+
+        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(binding.timerTypeTextView, "alpha", 0f, 1f);
+        fadeIn.setDuration(600); // Duración del fade-in
+        fadeIn.start();
 
         startTimer();
     }
@@ -155,6 +167,8 @@ public class FragmentTimer extends Fragment {
 
         String timeFormatted = String.format(Locale.getDefault(), "%02d:%02d:%02d", minutes, seconds, milliseconds);
         binding.timerTextView.setText(timeFormatted);
+
+
     }
 
     private void showEndOfCycle() {
