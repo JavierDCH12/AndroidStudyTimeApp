@@ -31,9 +31,13 @@ public class FragmentTimer extends Fragment {
     private long timeLeftInMillis = 10 * 1000;
     private CountDownTimer timer;
     private int sessionCount=1;
-    private static final long STUDY_TIME = 10 * 1000;
-    private static final long SHORT_BREAK_TIME = 10 * 1000;
-    private static final long LONG_BREAK_TIME = 10 * 1000;
+//    private static final long STUDY_TIME = 10 * 1000;
+//    private static final long SHORT_BREAK_TIME = 10 * 1000;
+//    private static final long LONG_BREAK_TIME = 10 * 1000;
+
+    private int studyTime;
+    private int shortBreakTime;
+    private int longBreakTime;
 
 
 
@@ -46,6 +50,13 @@ public class FragmentTimer extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(getArguments()!=null) {
+            studyTime = getArguments().getInt("studyTime", 25);
+            shortBreakTime = getArguments().getInt("shortBreakTime", 5);
+            longBreakTime = getArguments().getInt("longBreakTime", 15);
+
+        }
+
     }
 
     @Override
@@ -53,7 +64,7 @@ public class FragmentTimer extends Fragment {
         binding = FragmentTimerBinding.inflate(inflater, container, false);
 
         // Inicializar con la fase de estudio (asegúrate de que el primer paso sea siempre estudio)
-        setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
+        setPhase(studyTime, "TIME TO STUDY", R.color.study_color);
 
         binding.startButton.setOnClickListener(v -> startTimer());
         binding.pauseButton.setOnClickListener(v -> pauseTimer());
@@ -109,16 +120,16 @@ public class FragmentTimer extends Fragment {
 
     private void handleNextPhase() {
         if (sessionCount % 8 == 0) {
-            setPhase(LONG_BREAK_TIME, "LONG BREAK TIME", R.color.long_break_color);
+            setPhase(longBreakTime, "LONG BREAK TIME", R.color.long_break_color);
             vibratePhone(2000);
 
             showEndOfCycle();
         } else if (sessionCount % 2 == 0) {
-            setPhase(SHORT_BREAK_TIME, "SHORT BREAK TIME", R.color.short_break_color);
+            setPhase(shortBreakTime, "SHORT BREAK TIME", R.color.short_break_color);
             vibratePhone(1000);
 
         } else { // Fase de estudio
-            setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
+            setPhase(studyTime, "TIME TO STUDY", R.color.study_color);
             vibratePhonePattern();
 
         }
@@ -156,7 +167,7 @@ public class FragmentTimer extends Fragment {
             isRunning = false;
         }
         sessionCount = 0;
-        setPhase(STUDY_TIME, "TIME TO STUDY", R.color.study_color);
+        setPhase(studyTime, "TIME TO STUDY", R.color.study_color);
     }
 
 
@@ -179,7 +190,7 @@ public class FragmentTimer extends Fragment {
                 .setMessage("Has completado 4 sesiones de estudio. ¿Quieres seguir o acabar por hoy?")
                 .setPositiveButton("Estudiar", (dialog, which) -> {
                     sessionCount = 0;
-                    timeLeftInMillis = STUDY_TIME;
+                    timeLeftInMillis = studyTime;
                     updateTimerText();
                     startTimer();
                 })

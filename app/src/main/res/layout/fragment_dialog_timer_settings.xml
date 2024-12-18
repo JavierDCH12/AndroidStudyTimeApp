@@ -1,0 +1,66 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Texto para mostrar el tiempo de estudio -->
+    <TextView
+        android:id="@+id/studyTimeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Estudio: 25 min"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+
+    <!-- SeekBar para el tiempo de estudio -->
+    <SeekBar
+        android:id="@+id/studyTimeSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="60"
+        android:progress="25"/>
+
+    <!-- Texto para mostrar el tiempo de descanso corto -->
+    <TextView
+        android:id="@+id/shortBreakText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Descanso corto: 5 min"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+
+    <!-- SeekBar para el tiempo de descanso corto -->
+    <SeekBar
+        android:id="@+id/shortBreakSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="30"
+        android:progress="5"/>
+
+    <!-- Texto para mostrar el tiempo de descanso largo -->
+    <TextView
+        android:id="@+id/longBreakText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Descanso largo: 15 min"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+
+    <!-- SeekBar para el tiempo de descanso largo -->
+    <SeekBar
+        android:id="@+id/longBreakSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="30"
+        android:progress="15"/>
+
+    <!-- Botón para confirmar los cambios -->
+    <Button
+        android:id="@+id/confirmButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirmar"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
